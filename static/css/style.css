@@ -39,6 +39,53 @@
     --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+body.light-theme {
+    /* Light Theme Colors */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    
+    --border-color: rgba(15, 23, 42, 0.08);
+    --border-color-hover: rgba(56, 189, 248, 0.4);
+    
+    /* Semantic Colors */
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+}
+
+body.light-theme .glow-element {
+    opacity: 0.06;
+}
+
+body.light-theme h1 {
+    background: linear-gradient(135deg, #0f172a 30%, #0284c7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.light-theme dialog::backdrop {
+    background-color: rgba(15, 23, 42, 0.35);
+}
+
+body.light-theme .skeleton-line {
+    background-color: #e2e8f0;
+}
+
+body.light-theme .skeleton-badge, 
+body.light-theme .skeleton-btn {
+    background-color: #e2e8f0;
+}
+
+body.light-theme .btn-copy-action {
+    background-color: rgba(15, 23, 42, 0.02);
+}
+
+body.light-theme .btn-copy-action:hover {
+    background-color: rgba(56, 189, 248, 0.08);
+}
+
 /* ==========================================================================
    RESET & BASE STYLES
    ========================================================================== */

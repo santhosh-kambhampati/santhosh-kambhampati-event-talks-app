@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const btnRefresh = document.getElementById('btn-refresh');
     const btnExport = document.getElementById('btn-export');
+    const btnThemeToggle = document.getElementById('btn-theme-toggle');
     const statusIndicator = document.querySelector('.status-indicator');
     const statusText = document.getElementById('status-text');
     const lastUpdatedText = document.getElementById('last-updated');
@@ -44,11 +45,33 @@ document.addEventListener('DOMContentLoaded', () => {
         progressCircle.style.strokeDashoffset = circleCircumference;
     }
 
+    // Initialize Theme from LocalStorage
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        updateThemeIcon(true);
+    }
+
     // Initialize Page
     fetchReleases();
 
     // Event Listeners
     btnRefresh.addEventListener('click', fetchReleases);
+    
+    btnThemeToggle.addEventListener('click', () => {
+        const isLight = document.body.classList.toggle('light-theme');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        updateThemeIcon(isLight);
+    });
+    
+    function updateThemeIcon(isLight) {
+        const icon = btnThemeToggle.querySelector('i');
+        if (isLight) {
+            icon.className = 'fa-solid fa-sun';
+        } else {
+            icon.className = 'fa-solid fa-moon';
+        }
+    }
     
     btnExport.addEventListener('click', () => {
         if (currentReleases.length === 0) return;
