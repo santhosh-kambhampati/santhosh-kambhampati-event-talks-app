@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const btnRefresh = document.getElementById('btn-refresh');
+    const btnExport = document.getElementById('btn-export');
     const statusIndicator = document.querySelector('.status-indicator');
     const statusText = document.getElementById('status-text');
     const lastUpdatedText = document.getElementById('last-updated');
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // State
     let allReleases = [];
+    let currentReleases = [];
     let currentFilter = 'all';
     let searchQuery = '';
     
@@ -47,6 +49,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners
     btnRefresh.addEventListener('click', fetchReleases);
+    
+    btnExport.addEventListener('click', () => {
+        if (currentReleases.length === 0) return;
+        
+        const headers = ['Date', 'Type', 'Description', 'Link'];
+        const rows = currentReleases.map(item => {
+            const temp = document.createElement('div');
+            temp.innerHTML = item.description;
+            let plainDesc = temp.textContent || temp.innerText || "";
+            plainDesc = plainDesc.replace(/\s+/g, ' ').trim();
+            
+            return [
+                item.date,
+                item.type,
+                plainDesc,
+                item.link || ''
+            ];
+        });
+        
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(val => {
+                const strVal = String(val).replace(/"/g, '""');
+                return `"${strVal}"`;
+            }).join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `bigquery_releases_${new Date().toISOString().slice(0,10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
     
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.toLowerCase().trim();
@@ -114,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLoading) {
             btnRefresh.classList.add('loading');
             btnRefresh.disabled = true;
+            btnExport.style.display = 'none';
             statusIndicator.className = 'status-indicator loading';
             statusText.textContent = 'Fetching release feed...';
             
@@ -133,12 +173,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = new Date();
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         lastUpdatedText.textContent = `Last checked: Today at ${timeStr}`;
+        btnExport.style.display = allReleases.length > 0 ? 'inline-flex' : 'none';
     }
 
     function setErrorState(msg) {
         statusIndicator.className = 'status-indicator error';
         statusText.textContent = 'Fetch failed';
         lastUpdatedText.textContent = `Error: ${msg}`;
+        btnExport.style.display = 'none';
         
         if (allReleases.length === 0) {
             releasesContainer.innerHTML = `
@@ -185,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        currentReleases = filtered;
         renderReleases(filtered);
     }
 
@@ -246,14 +289,28 @@ document.addEventListener('DOMContentLoaded', () => {
                             </a>
                         ` : '<span></span>'}
                         
-                        <button class="btn-tweet-action" aria-label="Tweet this release update">
-                            <i class="fa-brands fa-x-twitter"></i>
-                            <span>Tweet Update</span>
-                        </button>
+                        <div class="card-btn-group">
+                            <button class="btn-copy-action" aria-label="Copy update text to clipboard">
+                                <i class="fa-regular fa-copy"></i>
+                                <span>Copy</span>
+                            </button>
+                            <button class="btn-tweet-action" aria-label="Tweet this release update">
+                                <i class="fa-brands fa-x-twitter"></i>
+                                <span>Tweet</span>
+                            </button>
+                        </div>
                     </footer>
                 </article>
             `;
         }).join('');
+
+        // Attach Copy listeners
+        const copyButtons = releasesContainer.querySelectorAll('.btn-copy-action');
+        copyButtons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                copyToClipboard(releases[index], btn);
+            });
+        });
 
         // Attach Tweet listeners
         const tweetButtons = releasesContainer.querySelectorAll('.btn-tweet-action');
@@ -261,6 +318,32 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => {
                 openTweetComposer(releases[index]);
             });
+        });
+    }
+
+    function copyToClipboard(release, button) {
+        const temp = document.createElement('div');
+        temp.innerHTML = release.description;
+        let plainText = temp.textContent || temp.innerText || "";
+        plainText = plainText.replace(/\s+/g, ' ').trim();
+        
+        const copyText = `🚀 [${release.type}] (${release.date})\n\n${plainText}\n\nRead more: ${release.link}`;
+        
+        navigator.clipboard.writeText(copyText).then(() => {
+            button.classList.add('copied');
+            const icon = button.querySelector('i');
+            const text = button.querySelector('span');
+            
+            icon.className = 'fa-solid fa-check';
+            text.textContent = 'Copied!';
+            
+            setTimeout(() => {
+                button.classList.remove('copied');
+                icon.className = 'fa-regular fa-copy';
+                text.textContent = 'Copy';
+            }, 1500);
+        }).catch(err => {
+            console.error('Failed to copy to clipboard:', err);
         });
     }
 
