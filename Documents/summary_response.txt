@@ -1,0 +1,1 @@
+This document is currently empty and contains no text. It is a placeholder file designated to store the response payload from CLI executions or API calls. No output content has been recorded yet.
