@@ -54,6 +54,7 @@
             <div class="status-meta">
                 <span class="status-indicator live"></span>
                 <span class="status-text" id="status-text">Checking for updates...</span>
+                <span id="match-counter" class="match-counter" style="display: none;"></span>
             </div>
             <div class="last-updated-text" id="last-updated">Last checked: Never</div>
         </section>
@@ -194,6 +195,11 @@
             </footer>
         </div>
     </dialog>
+
+    <!-- BACK TO TOP BUTTON -->
+    <button id="btn-back-to-top" class="btn-back-to-top" aria-label="Scroll back to top" style="display: none;">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
 
     <!-- JS script -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

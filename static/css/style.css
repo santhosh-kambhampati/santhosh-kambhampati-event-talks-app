@@ -633,7 +633,7 @@ h1 {
     color: var(--color-feature);
 }
 
-.btn-tweet-action {
+.btn-share-action {
     background-color: rgba(29, 155, 240, 0.1);
     color: var(--twitter-color);
     border: 1px solid rgba(29, 155, 240, 0.25);
@@ -648,7 +648,7 @@ h1 {
     transition: var(--transition-fast);
 }
 
-.btn-tweet-action:hover {
+.btn-share-action:hover {
     background-color: var(--twitter-color);
     color: #ffffff;
     box-shadow: 0 4px 10px rgba(29, 155, 240, 0.3);
@@ -1098,4 +1098,65 @@ dialog::backdrop {
     .releases-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* ==========================================================================
+   UX ENHANCEMENTS & ADDITIONS
+   ========================================================================== */
+body, .release-card, h1, .btn, .search-box input, .filter-pill, dialog, .source-update-info, .composer-container {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.match-counter {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    margin-left: 0.5rem;
+}
+
+mark.highlight {
+    background-color: rgba(56, 189, 248, 0.25);
+    color: var(--text-primary);
+    border-radius: 3px;
+    padding: 0.1rem 0.2rem;
+}
+
+body.light-theme mark.highlight {
+    background-color: rgba(2, 132, 199, 0.2);
+}
+
+.btn-back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 90;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.btn-back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.btn-back-to-top:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    background-color: rgba(56, 189, 248, 0.08);
 }

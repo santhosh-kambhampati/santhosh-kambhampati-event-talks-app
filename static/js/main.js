@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnRefresh = document.getElementById('btn-refresh');
     const btnExport = document.getElementById('btn-export');
     const btnThemeToggle = document.getElementById('btn-theme-toggle');
+    const btnBackToTop = document.getElementById('btn-back-to-top');
     const statusIndicator = document.querySelector('.status-indicator');
     const statusText = document.getElementById('status-text');
     const lastUpdatedText = document.getElementById('last-updated');
@@ -57,6 +58,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners
     btnRefresh.addEventListener('click', fetchReleases);
+    
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            btnBackToTop.style.display = 'flex';
+            requestAnimationFrame(() => {
+                btnBackToTop.classList.add('visible');
+            });
+        } else {
+            btnBackToTop.classList.remove('visible');
+            setTimeout(() => {
+                if (window.scrollY <= 300) {
+                    btnBackToTop.style.display = 'none';
+                }
+            }, 200);
+        }
+    });
+    
+    btnBackToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
     
     btnThemeToggle.addEventListener('click', () => {
         const isLight = document.body.classList.toggle('light-theme');
@@ -251,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         currentReleases = filtered;
+        updateMatchCounter(filtered.length);
         renderReleases(filtered);
     }
 
@@ -301,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </header>
                     
                     <div class="card-content">
-                        ${item.description}
+                        ${highlightText(item.description, searchQuery)}
                     </div>
                     
                     <footer class="card-actions">
@@ -317,9 +339,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <i class="fa-regular fa-copy"></i>
                                 <span>Copy</span>
                             </button>
-                            <button class="btn-tweet-action" aria-label="Tweet this release update">
-                                <i class="fa-brands fa-x-twitter"></i>
-                                <span>Tweet</span>
+                            <button class="btn-share-action" aria-label="Share this release update">
+                                <i class="fa-solid fa-share-nodes"></i>
+                                <span>Share</span>
                             </button>
                         </div>
                     </footer>
@@ -335,13 +357,55 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Attach Tweet listeners
-        const tweetButtons = releasesContainer.querySelectorAll('.btn-tweet-action');
-        tweetButtons.forEach((btn, index) => {
+        // Attach Share listeners
+        const shareButtons = releasesContainer.querySelectorAll('.btn-share-action');
+        shareButtons.forEach((btn, index) => {
             btn.addEventListener('click', () => {
-                openTweetComposer(releases[index]);
+                handleShare(releases[index]);
             });
         });
+    }
+
+    function updateMatchCounter(count) {
+        const matchCounter = document.getElementById('match-counter');
+        if (!matchCounter) return;
+        if (allReleases.length === 0) {
+            matchCounter.style.display = 'none';
+            return;
+        }
+        matchCounter.style.display = 'inline-block';
+        matchCounter.textContent = `Showing ${count} of ${allReleases.length}`;
+    }
+
+    function highlightText(text, query) {
+        if (!query) return text;
+        const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp(`(${escapedQuery})(?![^<>]*>)`, 'gi');
+        return text.replace(regex, '<mark class="highlight">$1</mark>');
+    }
+
+    function handleShare(release) {
+        const temp = document.createElement('div');
+        temp.innerHTML = release.description;
+        let plainText = temp.textContent || temp.innerText || "";
+        plainText = plainText.replace(/\s+/g, ' ').trim();
+        
+        const shareTitle = `BigQuery Update: [${release.type}]`;
+        const shareText = `🚀 [${release.type}] ${plainText}`;
+        const shareUrl = release.link;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: shareTitle,
+                text: shareText,
+                url: shareUrl
+            }).catch(err => {
+                console.log('Share canceled or failed:', err);
+            });
+        } else {
+            // Fallback to custom Tweet Composer Modal
+            openTweetComposer(release);
+        }
     }
 
     function copyToClipboard(release, button) {
